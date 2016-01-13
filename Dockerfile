@@ -1,10 +1,11 @@
 FROM debian:jessie
+MAINTAINER brucepcarvalho@gmail.com
 
 # persistent / runtime deps
 RUN apt-get update && apt-get install -y ca-certificates curl libpcre3 librecode0 libsqlite3-0 libxml2 --no-install-recommends && rm -r /var/lib/apt/lists/*
 
 # phpize deps
-RUN apt-get update && apt-get install -y autoconf file g++ gcc libc-dev libpq-dev make pkg-config re2c --no-install-recommends && rm -r /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y autoconf file g++ gcc libc-dev make pkg-config re2c --no-install-recommends && rm -r /var/lib/apt/lists/*
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
@@ -20,6 +21,7 @@ RUN set -xe \
    done
 
 ENV PHP_VERSION 5.5.27
+ENV XDEBUG_VERSION XDEBUG_2_3_3
 
 # --enable-mysqlnd is included below because it's harder to compile after the fact the extensions are (since it's a plugin for several extensions, not an extension in itself)
 RUN buildDeps=" \
@@ -58,7 +60,6 @@ RUN buildDeps=" \
       --disable-cgi \
       --enable-mysqlnd \
       --enable-exif \
-      --with-pdo-pgsql \
       --with-jpeg-dir \
       --with-gd \
       --with-freetype-dir \
@@ -101,7 +102,6 @@ RUN chmod +x /usr/local/bin/docker-php-ext-*
 RUN docker-php-ext-install zip bz2 mbstring json \
   && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
   && docker-php-ext-install gd
-
 # opcache
 RUN docker-php-ext-install opcache
 
@@ -129,7 +129,7 @@ RUN runtimeRequirements="libmagickwand-6.q16-dev --no-install-recommends" \
 
 WORKDIR /root
 
-RUN git clone git://github.com/derickr/xdebug.git \
+RUN git clone -b $XDEBUG_VERSION --single-branch --depth 1 https://github.com/xdebug/xdebug.git \
    && cd xdebug \
    && phpize \
    && ./configure --enable-xdebug \
