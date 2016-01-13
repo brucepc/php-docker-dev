@@ -94,7 +94,7 @@ RUN apt-get update && \
    git \
   && rm -r /var/lib/apt/lists/*
 
-COPY Suporte/docker/php-fpm/docker-php-ext-* /usr/local/bin/
+COPY docker-php-ext-* /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/docker-php-ext-*
 
